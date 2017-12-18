@@ -2,8 +2,9 @@
 
 namespace App\Containers\Documentation\Actions;
 
-use App\Ship\Parents\Actions\Action;
 use Apiato\Core\Foundation\Facades\Apiato;
+use App\Ship\Parents\Actions\Action;
+use App\Ship\Transporters\DataTransporter;
 
 /**
  * Class GenerateDocumentationAction.
@@ -14,10 +15,12 @@ class GenerateDocumentationAction extends Action
 {
 
     /**
-     * @param $console
+     * @param \App\Ship\Transporters\DataTransporter $data
      */
-    public function run($console)
+    public function run(DataTransporter $data): void
     {
+        $console = $data->command_instance;
+
         // parse the markdown file.
         Apiato::call('Documentation@RenderTemplatesTask');
 
@@ -26,12 +29,10 @@ class GenerateDocumentationAction extends Action
 
         $console->info("Generating API Documentations for (" . implode(' & ', $types) . ")\n");
 
-        $documentationUrls = [];
-
         // for each type, generate docs.
-        foreach ($types as $type) {
-            $documentationUrls[] = Apiato::call('Documentation@GenerateAPIDocsTask', [$type, $console]);
-        }
+        $documentationUrls = array_map(function ($type) use ($console) {
+            return Apiato::call('Documentation@GenerateAPIDocsTask', [$type, $console]);
+        }, $types);
 
         $console->info("Done! You can access your API Docs at: \n" . implode("\n", $documentationUrls));
     }

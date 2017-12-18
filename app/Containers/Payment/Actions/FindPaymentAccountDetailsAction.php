@@ -2,9 +2,10 @@
 
 namespace App\Containers\Payment\Actions;
 
-use App\Ship\Parents\Actions\Action;
-use App\Ship\Parents\Requests\Request;
 use Apiato\Core\Foundation\Facades\Apiato;
+use App\Containers\Payment\Models\PaymentAccount;
+use App\Ship\Parents\Actions\Action;
+use App\Ship\Transporters\DataTransporter;
 
 /**
  * Class FindPaymentAccountDetailsAction
@@ -15,16 +16,15 @@ class FindPaymentAccountDetailsAction extends Action
 {
 
     /**
-     * @param \App\Ship\Parents\Requests\Request $request
+     * @param \App\Ship\Transporters\DataTransporter $data
      *
-     * @return  mixed
+     * @return  \App\Containers\Payment\Models\PaymentAccount
      */
-    public function run(Request $request)
+    public function run(DataTransporter $data): PaymentAccount
     {
         $user = Apiato::call('Authentication@GetAuthenticatedUserTask');
 
-        $paymentAccountId = $request->getInputByKey('id');
-        $paymentAccount = Apiato::call('Payment@FindPaymentAccountByIdTask', [$paymentAccountId]);
+        $paymentAccount = Apiato::call('Payment@FindPaymentAccountByIdTask', [$data->id]);
 
         // check if this account belongs to our user
         Apiato::call('Payment@CheckIfPaymentAccountBelongsToUserTask', [$user, $paymentAccount]);

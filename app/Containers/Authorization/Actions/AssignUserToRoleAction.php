@@ -2,9 +2,10 @@
 
 namespace App\Containers\Authorization\Actions;
 
-use App\Ship\Parents\Actions\Action;
-use App\Ship\Parents\Requests\Request;
 use Apiato\Core\Foundation\Facades\Apiato;
+use App\Containers\User\Models\User;
+use App\Ship\Parents\Actions\Action;
+use App\Ship\Transporters\DataTransporter;
 
 /**
  * Class AssignUserToRoleAction.
@@ -15,25 +16,23 @@ class AssignUserToRoleAction extends Action
 {
 
     /**
-     * @param \App\Ship\Parents\Requests\Request $request
+     * @param \App\Ship\Transporters\DataTransporter $data
      *
-     * @return  mixed
+     * @return  \App\Containers\User\Models\User
      */
-    public function run(Request $request)
+    public function run(DataTransporter $data): User
     {
-        $user = Apiato::call('User@FindUserByIdTask', [$request->user_id]);
+        $user = Apiato::call('User@FindUserByIdTask', [$data->user_id]);
 
-        $roles = [];
+        // convert to array in case single ID was passed
+        $rolesIds = (array)$data->roles_ids;
 
-        // convert roles IDs to array (in case single id passed)
-        if (!is_array($rolesIds = $request->roles_ids)) {
-            $rolesIds = [$request->roles_ids];
-        }
+        $roles = array_map(function ($roleId) {
+            return Apiato::call('Authorization@FindRoleTask', [$roleId]);
+        }, $rolesIds);
 
-        foreach ($rolesIds as $roleId) {
-            $roles[] = Apiato::call('Authorization@FindRoleTask', [$roleId]);
-        }
+        $user = Apiato::call('Authorization@AssignUserToRoleTask', [$user, $roles]);
 
-        return Apiato::call('Authorization@AssignUserToRoleTask', [$user, $roles]);
+        return $user;
     }
 }

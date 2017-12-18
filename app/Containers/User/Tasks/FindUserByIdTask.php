@@ -23,7 +23,7 @@ class FindUserByIdTask extends Task
      * @return User
      * @throws NotFoundException
      */
-    public function run($userId)
+    public function run($userId): User
     {
         // find the user by its id
         try {

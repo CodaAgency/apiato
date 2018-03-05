@@ -3,6 +3,7 @@
 namespace App\Containers\Payment\Contracts;
 
 use App\Containers\Payment\Models\PaymentAccount;
+use App\Containers\Payment\Models\PaymentTransaction;
 use JohannesSchobel\ShoppingCart\Models\ShoppingCart;
 
 /**
@@ -16,22 +17,21 @@ interface ChargeableInterface
      * Charge the user on a given account
      *
      * @param PaymentAccount                $account
-     * @param                               $amount
-     * @param                               $currency
+     * @param int|float                     $amount
+     * @param string|null                   $currency
      *
-     * @return mixed
+     * @return PaymentTransaction
      */
-    public function charge(PaymentAccount $account, $amount, $currency);
+    public function charge(PaymentAccount $account, $amount, $currency) : PaymentTransaction;
 
     /**
      * Purchase a shopping cart and pay with a given account
      *
      * @param PaymentAccount $account
      * @param ShoppingCart   $cart
-     * @param                $currency
      *
-     * @return mixed
+     * @return PaymentTransaction
      */
-    public function purchaseShoppingCart(PaymentAccount $account, ShoppingCart $cart, $currency);
+    public function purchaseShoppingCart(PaymentAccount $account, ShoppingCart $cart) : PaymentTransaction;
 
 }
